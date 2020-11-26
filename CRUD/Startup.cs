@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Data;
 using Microsoft.EntityFrameworkCore;
+using Service.User;
 
 namespace CRUD
 {
@@ -26,8 +27,9 @@ namespace CRUD
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            services.AddScoped<IUserService, UserService>();
             services.AddDbContext<DBContext>(options =>
-                options.UseSqlServer("Data Source=LAPTOP-EK0HL9J6\\MSSQLSERVER01;Initial Catalog=Reva;Integrated Security=True"));
+                options.UseSqlServer("Data Source=LAPTOP-EK0HL9J6\\MSSQLSERVER01;Initial Catalog=CRUD;Integrated Security=True"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

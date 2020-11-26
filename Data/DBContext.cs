@@ -11,6 +11,10 @@ namespace Data
     {
         public DbSet<User> Users { get; set; }
 
+        public DBContext(DbContextOptions<DBContext> dbContext) : base(dbContext)
+        {
+
+        }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
