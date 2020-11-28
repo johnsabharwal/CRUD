@@ -70,7 +70,8 @@ namespace CRUD.Controllers
         {
             try
             {
-                await _userService.GetUsers();
+                var data = await _userService.GetUsers();
+                return Json(data);
 
             }
             catch (Exception e)
