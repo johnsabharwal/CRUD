@@ -1,7 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
-<div class="container">
+<div class="container" ng-app="myApp" ng-controller="myCtrl">
     <div class="row">
         <div class="col-lg-4">
             <h2>Users</h2>
@@ -9,18 +9,19 @@
         </div>
         <div class="col-lg-8" style="display:inline-flex">
             <input type="text" class="form-control" placeholder="Search" />
-            <input type="button" class="btn btn-warning" value="Add User" />
+            <input type="button" data-toggle="modal" data-target="#addUser" class="btn btn-warning" value="Add User" />
 
 
         </div>
     </div>
-    <table class="table table-hover" ng-app="myApp" ng-controller="myCtrl">
+    <table class="table table-hover">
         <thead data-ng-init="LoadUsers()">
             <tr>
                 <th>Name</th>
                 <th>Email</th>
                 <th>Role Type</th>
                 <th>Status</th>
+                <th></th>
 
             </tr>
         </thead>
@@ -30,33 +31,132 @@
                 <td>{{user.email}}</td>
                 <td>{{user.roleType}}</td>
                 <td>{{user.status}}</td>
-
+                <td><a href="javascript:void(0)" ng-click="Update(user)">edit</a>
+                    <a  href="javascript:void(0)"  ng-click="Delete(user.id)">delete</a></td>
             </tr>
 
         </tbody>
     </table>
+    <div class="modal fade" id="addUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Add User</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="name">Name</label>
+
+                            <input type="text" class="form-control" placeholder="name" ng-model="userVm.Name">
+
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email address</label>
+                            <input type="email" class="form-control" placeholder="name@example.com" ng-model="userVm.Email" readonly="readonly">
+                        </div>
+                        Role Type
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" ng-checked="userVm.RoleType=='Admin'" value="option1" ng-click="userVm.RoleType='Admin'">
+                            <label class="form-check-label" for="inlineRadio1"> Admin</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2" ng-checked="userVm.RoleType=='Customer'" ng-click="userVm.RoleType='Customer'">
+                            <label class="form-check-label" for="inlineRadio2">Customer Executive</label>
+                        </div>
+                        <br />
+                        <div class="form-group">
+                            <label for="mobile">Mobile</label>
+                            <input type="text" class="form-control" placeholder="Mobile Number (Optional)" ng-model="userVm.Mobile">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <a href="javascript:void(0)" class="btn btn-primary" ng-click="AddUser(userVm)">Save changes</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+
+<!-- Modal -->
+
 @section scripts{
     <script>
         var app = angular.module('myApp', []);
-        app.controller('myCtrl', function ($scope) {
+        app.controller('myCtrl',
+            function($scope) {
 
+                $scope.userVm = {
+                    Id: "",
+                    Name: "",
+                    Email: "",
+                    RoleType: "Admin",
+                    Status: "",
+                    Mobile: ""
+                }
+                $scope.init = function() {
+                    $scope.LoadUsers();
+                }
+                $scope.LoadUsers = function() {
+                    $.ajax({
+                        type: "POST",
+                        url: "Home/List",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function(result) {
+                            $scope.Users = result;
+                            $scope.$apply();
+                        }
+                    });
+                }
+                $scope.AddUser = function(obj) {
+                    console.log(1);
+                    var data = JSON.parse(JSON.stringify(obj));
+                    $.ajax({
+                        type: "POST",
+                        url: "Home/Create",
+                        data: { userVm: data },
+                        dataType: 'json',
+                        success: function(result) {
+                            $('#addUser').modal('toggle');
+                            $scope.LoadUsers();
+                            $scope.$apply();
+                        }
+                    });
+                }
 
-            $scope.init = function () {
-                $scope.LoadUsers();
-            }
-            $scope.LoadUsers = function () {
-                $.ajax({
-                    type: "POST",
-                    url: "Home/List",
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    success: function (result) {
-                        $scope.Users = result;
-                        $scope.$apply();
+                $scope.Update = function(obj) {
+                    $scope.userVm = {
+                        Id: obj.id,
+                        Name: obj.name,
+                        Email: obj.email,
+                        RoleType: obj.roleType,
+                        Status: obj.Status,
+                        Mobile: obj.mobile
                     }
-                });
-            }
-        });
+                    $('#addUser').modal('toggle');
+
+                }
+
+                $scope.Delete = function (id) {
+                    $.ajax({
+                        type: "POST",
+                        url: "Home/Delete?userId="+id,
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function(result) {
+                            $scope.LoadUsers();
+                            $scope.$apply();
+                        }
+                    });
+                }
+
+            });
     </script>
 }

@@ -28,6 +28,7 @@ namespace CRUD.Controllers
         {
             return View();
         }
+        [HttpPost]
 
         public async Task<JsonResult> Create(UserVm userVm)
         {
@@ -41,7 +42,7 @@ namespace CRUD.Controllers
             }
             return Json(new object());
         }
-        public async Task<JsonResult> DeleteAsync(int userId)
+        public async Task<JsonResult> Delete(int userId)
         {
             try
             {
